@@ -21,13 +21,13 @@ LOG_LEVELS = {
 # TODO: make a cli argument + simpler custom pattern system for the future
 TIMECODE_SEARCH_PATTERNS = [
     re.compile(
-        r"Unit \d+. Activity [a-zA-Z]. .+?(?=\.|$)"
+        r"Unit \d+. Activity [a-zA-Z]. .+?(?=\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. Activity {letter}. {...remaining sentence}
     re.compile(
-        r"Unit \d+. Practice \d+..+?(?=\.|$)"
+        r"Unit \d+. Practice \d+..+?(?=\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. Practice {number}. {...remaining sentence}
     re.compile(
-        r"Unit \d+. (?![^.]*\bActivity|Practice\b)[^.]*(\.|$)"
+        r"Unit \d+. (?![^.]*\bActivity|Practice\b)[^.]*(\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. {...remaining sentence}
 ]
 
