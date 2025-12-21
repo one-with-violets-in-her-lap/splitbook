@@ -1,5 +1,4 @@
 import logging
-import re
 from dataclasses import dataclass
 from re import Pattern
 from typing import TypedDict, cast
@@ -41,18 +40,42 @@ def find_segment_by_string_position(segment_group: list[Segment], position: int)
         text_end = text_end + len(segment["text"])
 
         if position > text_start and position < text_end:
-            print("\n")
             return segment
+
+
+def parse_timecodes_from_segment_group(
+    text: str, segment_group: list[Segment], search_pattern: Pattern
+):
+    timecodes: list[Timecode] = []
+
+    for match in search_pattern.finditer(text):
+        _logger.info("Match: %s", match.group())
+
+        segment_with_occurrence = find_segment_by_string_position(
+            segment_group, match.start()
+        )
+
+        if segment_with_occurrence is None:
+            _logger.warning(
+                "Failed to find segment by string position. Falling back to a starting segment"
+            )
+            segment_with_occurrence = segment_group[0]
+
+        timecodes.append(
+            Timecode(
+                id=segment_with_occurrence["id"],
+                start_seconds=segment_with_occurrence["start"],
+                title=match.group(),
+            )
+        )
+
+    return timecodes
 
 
 def extract_timecodes(segments: list[Segment], search_patterns: list[Pattern]):
     timecodes: list[Timecode] = []
 
-    segment_start_index = 0
-
-    while segment_start_index < len(segments):
-        starting_segment = segments[segment_start_index]
-
+    for segment_start_index, _ in enumerate(segments):
         segment_group = segments[
             segment_start_index : segment_start_index + SEGMENT_GROUP_SIZE
         ]
@@ -61,38 +84,21 @@ def extract_timecodes(segments: list[Segment], search_patterns: list[Pattern]):
 
         _logger.debug("Merged segments: %s", text)
 
-        any_pattern_match: re.Match | None = None
-
         for pattern in search_patterns:
-            current_pattern_match = pattern.search(text)
-            if current_pattern_match is not None and any_pattern_match is None:
-                any_pattern_match = current_pattern_match
-
-            if current_pattern_match is not None:
-                _logger.info("Match: %s", current_pattern_match.group())
-
-                segment_with_occurrence = find_segment_by_string_position(
-                    segment_group, current_pattern_match.start()
-                )
-
-                if segment_with_occurrence is None:
-                    _logger.warning(
-                        "Failed to find segment by string position. Falling back to a starting segment"
+            for found_timecode in parse_timecodes_from_segment_group(
+                text, segment_group, pattern
+            ):
+                if (
+                    len(
+                        [
+                            timecode
+                            for timecode in timecodes
+                            if timecode.start_seconds == found_timecode.start_seconds
+                        ]
                     )
-                    segment_with_occurrence = starting_segment
-
-                timecodes.append(
-                    Timecode(
-                        id=segment_with_occurrence["id"],
-                        start_seconds=segment_with_occurrence["start"],
-                        title=current_pattern_match.group(),
-                    )
-                )
-
-        if any_pattern_match is not None:
-            segment_start_index = segment_start_index + SEGMENT_GROUP_SIZE
-        else:
-            segment_start_index = segment_start_index + 1
+                    == 0
+                ):
+                    timecodes.append(found_timecode)
 
     return timecodes
 

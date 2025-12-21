@@ -4,13 +4,13 @@ from timecodes_generator.core.generate_timecodes import Segment, extract_timecod
 
 TEST_TIMECODE_SEARCH_PATTERNS = [
     re.compile(
-        r"Unit \d+. Activity [a-zA-Z]. .+?(?=\.|$)", flags=re.IGNORECASE
+        r"(?:Unit \d+.?)? Activity [a-zA-Z].+?(?=\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. Activity {letter}. {...remaining sentence}
     re.compile(
-        r"Unit \d+. Practice \d+..+?(?=\.|$)", flags=re.IGNORECASE
+        r"(?:Unit \d+.?)? Practice \d.+?(?=\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. Practice {number}. {...remaining sentence}
     re.compile(
-        r"Unit \d+. (?![^.]*\bActivity|Practice\b)[^.]*(\.|$)", flags=re.IGNORECASE
+        r"Unit \d+.? (?![^.]*\bActivity|Practice\b)[^.]*(\.|$)", flags=re.IGNORECASE
     ),  # Unit {number}. {...remaining sentence}
 ]
 
@@ -58,8 +58,6 @@ def test_generate_timecodes():
     timecodes = extract_timecodes(
         TEST_TRANSCRIPTION_SEGMENTS, TEST_TIMECODE_SEARCH_PATTERNS
     )
-
-    print(timecodes)
 
     assert timecodes[0].start_seconds == 6
     assert timecodes[0].title == "Unit 1. Basic words."
