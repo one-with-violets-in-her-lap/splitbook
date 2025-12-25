@@ -83,7 +83,7 @@ def add_or_update_timecode(timecodes: list[Timecode], new_timecode: Timecode):
     timecodes.append(new_timecode)
 
 
-def extract_timecodes(segments: list[Segment], search_patterns: list[Pattern]):
+def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
     timecodes: list[Timecode] = []
 
     for segment_start_index, _ in enumerate(segments):
@@ -95,17 +95,16 @@ def extract_timecodes(segments: list[Segment], search_patterns: list[Pattern]):
 
         _logger.debug("Merged segments: %s", text)
 
-        for pattern in search_patterns:
-            for found_timecode in parse_timecodes_from_segment_group(
-                text, segment_group, pattern
-            ):
-                add_or_update_timecode(timecodes, found_timecode)
+        for found_timecode in parse_timecodes_from_segment_group(
+            text, segment_group, search_pattern
+        ):
+            add_or_update_timecode(timecodes, found_timecode)
 
     return timecodes
 
 
 def generate_timecodes(
-    whisper_model: Whisper, file_path: str, search_patterns: list[Pattern]
+    whisper_model: Whisper, file_path: str, search_pattern: Pattern
 ) -> list[Timecode]:
     transcription_result = whisper_model.transcribe(file_path)
     segments = cast(list[Segment], transcription_result["segments"])
@@ -116,4 +115,4 @@ def generate_timecodes(
         "\n".join([str(segment) for segment in transcription_result["segments"]]),
     )
 
-    return extract_timecodes(segments, search_patterns)
+    return extract_timecodes(segments, search_pattern)

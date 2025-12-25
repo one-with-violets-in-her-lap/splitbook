@@ -10,24 +10,22 @@ from timecodes_generator.core.utils.datetime_formatting import (
     format_timestamp_from_seconds,
 )
 
-# TODO: make a cli argument + simpler custom pattern system for the future
-TIMECODE_SEARCH_PATTERNS = [
-    re.compile(
-        r"(?:Unit \d+.? )?Activity [a-zA-Z].+?(?=\.|$)", flags=re.IGNORECASE
-    ),  # Unit {number}. Activity {letter}. {...remaining sentence}
-    re.compile(
-        r"(?:Unit \d+.? )?Practice \d.+?(?=\.|$)", flags=re.IGNORECASE
-    ),  # Unit {number}. Practice {number}. {...remaining sentence}
-    re.compile(
-        r"Unit \d+.? (?![^.]*\bActivity|Practice\b)[^.]*(\.|$)", flags=re.IGNORECASE
-    ),  # Unit {number}. {...remaining sentence}
-]
-
 log_level_names_mapping = logging.getLevelNamesMapping()
 
 
 @click.command()
 @click.argument("file-path", required=True)
+@click.option(
+    "--search",
+    "-s",
+    "search_patterns",
+    required=True,
+    multiple=True,
+    help="Pattern in regular expression format to match word markers. "
+    + "Example: Unit \\d (matches Unit {number}). "
+    + "You can provide multiple patterns by using "
+    + "this option multiple times (-s Pattern -s Pattern ...)",
+)
 @click.option(
     "--log-level", "-l", type=click.Choice(log_level_names_mapping), default="ERROR"
 )
@@ -46,7 +44,11 @@ log_level_names_mapping = logging.getLevelNamesMapping()
     help="Encode timecodes in a new MP3 file with chapters",
 )
 def start_cli(
-    file_path: str, log_level: str, model_name: str, save_tagged_mp3_file: bool | None
+    file_path: str,
+    search_patterns: list[str],
+    log_level: str,
+    model_name: str,
+    save_tagged_mp3_file: bool | None,
 ):
     logging.basicConfig(
         level=log_level_names_mapping[log_level],
@@ -58,7 +60,9 @@ def start_cli(
     model = load_whisper_model(ModelName(model_name))
 
     click.secho("- Transcribing ...\n", dim=True)
-    timecodes = generate_timecodes(model, file_path, TIMECODE_SEARCH_PATTERNS)
+    timecodes = generate_timecodes(
+        model, file_path, re.compile("|".join(search_patterns), flags=re.IGNORECASE)
+    )
 
     click.secho("\n★ Timecodes:", bold=True)
 
