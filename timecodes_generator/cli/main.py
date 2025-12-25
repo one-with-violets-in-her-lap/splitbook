@@ -36,6 +36,7 @@ def main():
     parser = argparse.ArgumentParser(prog="Timecodes generator")
     parser.add_argument("file_path", help="Path to an audio file to process")
     parser.add_argument("--log-level", default="critical")
+    parser.add_argument("--model", default="small")
 
     args = parser.parse_args()
     log_level = LOG_LEVELS[args.log_level]
@@ -47,7 +48,7 @@ def main():
     )
 
     print("Loading a model")
-    model = load_whisper_model("small")
+    model = load_whisper_model(args.model)
 
     print("Transcribing", "\n")
     timecodes = generate_timecodes(model, args.file_path, TIMECODE_SEARCH_PATTERNS)
