@@ -1,6 +1,7 @@
 from enum import Enum
 
-import whisper
+import whisperx
+import whisperx.asr
 
 
 class ModelName(Enum):
@@ -16,5 +17,5 @@ class ModelName(Enum):
     TURBO = "turbo"
 
 
-def load_whisper_model(model_name: ModelName):
-    return whisper.load_model(model_name.value)
+def load_whisper_model(model_name: ModelName) -> whisperx.asr.FasterWhisperPipeline:
+    return whisperx.load_model(model_name.value, compute_type="float16", device="cuda")

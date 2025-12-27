@@ -1,9 +1,8 @@
 import logging
 from dataclasses import dataclass
 from re import Pattern
-from typing import TypedDict, cast
 
-from whisper import Whisper
+import whisperx.asr
 
 from timecodes_generator.core.utils.datetime_formatting import (
     format_timestamp_from_seconds,
@@ -12,18 +11,10 @@ from timecodes_generator.core.utils.datetime_formatting import (
 _logger = logging.getLogger(__name__)
 
 
-class Segment(TypedDict):
-    id: int
-    start: int
-    end: int
-    text: str
-
-
 @dataclass
 class Timecode:
-    id: int
-    start_seconds: int
-    end_seconds: int
+    start_seconds: float
+    end_seconds: float
     title: str
 
     def __str__(self):
@@ -33,7 +24,9 @@ class Timecode:
 SEGMENT_GROUP_SIZE = 3
 
 
-def find_segment_by_string_position(segment_group: list[Segment], position: int):
+def find_segment_by_string_position(
+    segment_group: list[whisperx.asr.SingleSegment], position: int
+):
     text_end = 0
 
     for segment in segment_group:
@@ -45,7 +38,7 @@ def find_segment_by_string_position(segment_group: list[Segment], position: int)
 
 
 def parse_timecodes_from_segment_group(
-    text: str, segment_group: list[Segment], search_pattern: Pattern
+    text: str, segment_group: list[whisperx.asr.SingleSegment], search_pattern: Pattern
 ):
     timecodes: list[Timecode] = []
 
@@ -62,7 +55,6 @@ def parse_timecodes_from_segment_group(
 
         timecodes.append(
             Timecode(
-                id=segment_with_occurrence["id"],
                 start_seconds=segment_with_occurrence["start"],
                 end_seconds=segment_with_occurrence["end"],
                 title=match.group(),
@@ -83,7 +75,9 @@ def add_or_update_timecode(timecodes: list[Timecode], new_timecode: Timecode):
     timecodes.append(new_timecode)
 
 
-def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
+def extract_timecodes(
+    segments: list[whisperx.asr.SingleSegment], search_pattern: Pattern
+):
     timecodes: list[Timecode] = []
 
     for segment_start_index, _ in enumerate(segments):
@@ -104,15 +98,18 @@ def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
 
 
 def generate_timecodes(
-    whisper_model: Whisper, file_path: str, search_pattern: Pattern
+    whisper_model: whisperx.asr.FasterWhisperPipeline,
+    file_path: str,
+    search_pattern: Pattern,
+    batch_size=16,
 ) -> list[Timecode]:
-    transcription_result = whisper_model.transcribe(file_path)
-    segments = cast(list[Segment], transcription_result["segments"])
+    transcription_result = whisper_model.transcribe(file_path, batch_size=batch_size, verbose=True)
 
-    _logger.debug("Transcribed: %s", transcription_result["text"])
+    print("Transcribed")
+
     _logger.debug(
         "Segments: %s",
         "\n".join([str(segment) for segment in transcription_result["segments"]]),
     )
 
-    return extract_timecodes(segments, search_pattern)
+    return extract_timecodes(transcription_result["segments"], search_pattern)

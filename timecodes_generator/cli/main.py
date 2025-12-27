@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 import logging
 import re
 
@@ -9,6 +12,7 @@ from timecodes_generator.core.load import ModelName, load_whisper_model
 from timecodes_generator.core.utils.datetime_formatting import (
     format_timestamp_from_seconds,
 )
+from timecodes_generator.core.utils.regex import join_and_compile_regex_patterns
 
 log_level_names_mapping = logging.getLevelNamesMapping()
 
@@ -36,6 +40,7 @@ log_level_names_mapping = logging.getLevelNamesMapping()
     type=click.Choice([model_name_type.value for model_name_type in ModelName]),
     default="small",
 )
+@click.option("--batch-size", "-b", default=16)
 @click.option(
     "--tagged-mp3",
     "save_tagged_mp3_file",
@@ -48,6 +53,7 @@ def start_cli(
     search_patterns: list[str],
     log_level: str,
     model_name: str,
+    batch_size: int,
     save_tagged_mp3_file: bool | None,
 ):
     logging.basicConfig(
@@ -56,12 +62,17 @@ def start_cli(
         datefmt="%m/%d/%Y %I:%M:%S %p",
     )
 
-    click.secho(f"\n- Loading a model - Whisper {model_name}\n", dim=True)
+    click.secho(
+        f"\n- Loading a model - WhisperX {model_name} (float16, batch size: {batch_size})",
+        dim=True,
+    )
     model = load_whisper_model(ModelName(model_name))
 
     click.secho("- Transcribing ...\n", dim=True)
     timecodes = generate_timecodes(
-        model, file_path, re.compile("|".join(search_patterns), flags=re.IGNORECASE)
+        model,
+        file_path,
+        join_and_compile_regex_patterns(search_patterns, flags=re.IGNORECASE),
     )
 
     click.secho("\n★ Timecodes:", bold=True)
