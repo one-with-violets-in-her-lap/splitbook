@@ -104,9 +104,12 @@ def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
 
 
 def generate_timecodes(
-    whisper_model: Whisper, file_path: str, search_pattern: Pattern
+    whisper_model: Whisper,
+    file_path: str,
+    search_pattern: Pattern,
+    verbose: bool | None = None,
 ) -> list[Timecode]:
-    transcription_result = whisper_model.transcribe(file_path)
+    transcription_result = whisper_model.transcribe(file_path, verbose=verbose)
     segments = cast(list[Segment], transcription_result["segments"])
 
     _logger.debug("Transcribed: %s", transcription_result["text"])

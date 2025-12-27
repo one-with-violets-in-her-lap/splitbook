@@ -61,7 +61,10 @@ def start_cli(
 
     click.secho("- Transcribing ...\n", dim=True)
     timecodes = generate_timecodes(
-        model, file_path, re.compile("|".join(search_patterns), flags=re.IGNORECASE)
+        model,
+        file_path,
+        re.compile("|".join(search_patterns), flags=re.IGNORECASE),
+        verbose=False,
     )
 
     click.secho("\n★ Timecodes:", bold=True)
