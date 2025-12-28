@@ -51,12 +51,14 @@ export_format_click_type = click.Choice(
     + "- id3: Encode timecodes in a new MP3 file with chapters\n"
     + "- folder: Split original file in multiple files based on the timecodes",
 )
+@click.option("--verbose", "-v", "is_verbose", default=False)
 def start_cli(
     file_path: str,
     search_patterns: list[str],
     log_level: str,
     model_name: str,
     export_format: str | None,
+    is_verbose: bool,
 ):
     logging.basicConfig(
         level=log_level_names_mapping[log_level],
@@ -99,7 +101,7 @@ def start_cli(
 
     if export_format is not None:
         exporter = EXPORTERS[ExportFormat(export_format)]
-        export_result_path = exporter(file_path, timecodes)
+        export_result_path = exporter(file_path, timecodes, is_verbose)
 
         click.secho(f"\n✓ Saved at {export_result_path}", fg="green")
 

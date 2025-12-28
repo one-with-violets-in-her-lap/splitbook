@@ -11,7 +11,7 @@ class ExportFormat(Enum):
     FOLDER = "folder"
 
 
-EXPORTERS: dict[ExportFormat, Callable[[str, list[Timecode]], str]] = {
+EXPORTERS: dict[ExportFormat, Callable[[str, list[Timecode], bool], str]] = {
     ExportFormat.ID3_TAGGED_FILE: export_tagged_audio_file,
     ExportFormat.FOLDER: export_timecodes_as_folder,
 }
