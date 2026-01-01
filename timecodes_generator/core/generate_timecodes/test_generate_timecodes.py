@@ -13,42 +13,42 @@ TEST_TIMECODE_SEARCH_PATTERNS = [
 ]
 
 TEST_TRANSCRIPTION_SEGMENTS: list[Segment] = [
-    {
-        "id": 1,
-        "start": 0,
-        "end": 5,
-        "text": ' Welcome to the "Learn English" book. The book contains grammar info,',
-    },
-    {
-        "id": 2,
-        "start": 6,
-        "end": 12,
-        "text": " exercises and optional audition practice. Unit 1. Basic words.",
-    },
-    {
-        "id": 3,
-        "start": 14,
-        "end": 20,
-        "text": " Placeholder text. Placeholder text, placeholder text, placeholder text.",
-    },
-    {
-        "id": 4,
-        "start": 21,
-        "end": 26,
-        "text": " Unit 1. Activity A. Greetings. Placeholder text, placeholder text, placeholder text, placeholder text.",
-    },
-    {
-        "id": 5,
-        "start": 28,
-        "end": 36,
-        "text": " Unit 1, practice 1. Responding. Placeholder text, placeholder text,",
-    },
-    {
-        "id": 6,
-        "start": 36,
-        "end": 47,
-        "text": " placeholder text. Unit 2, Verbs. Placeholder text, placeholder text. Placeholder text.",
-    },
+    Segment(
+        id=1,
+        start=0,
+        end=5,
+        text=' Welcome to the "Learn English" book. The book contains grammar info,',
+    ),
+    Segment(
+        id=2,
+        start=6,
+        end=12,
+        text=" exercises and optional audition practice. Unit 1. Basic words.",
+    ),
+    Segment(
+        id=3,
+        start=14,
+        end=20,
+        text=" Placeholder text. Placeholder text, placeholder text, placeholder text.",
+    ),
+    Segment(
+        id=4,
+        start=21,
+        end=26,
+        text=" Unit 1. Activity A. Greetings. Placeholder text, placeholder text, placeholder text, placeholder text.",
+    ),
+    Segment(
+        id=5,
+        start=28,
+        end=36,
+        text=" Unit 1, practice 1. Responding. Placeholder text, placeholder text,",
+    ),
+    Segment(
+        id=6,
+        start=36,
+        end=47,
+        text=" placeholder text. Unit 2, Verbs. Placeholder text, placeholder text. Placeholder text.",
+    ),
 ]
 
 

@@ -2,7 +2,7 @@ SECONDS_IN_MINUTE = 60
 SECONDS_IN_HOUR = SECONDS_IN_MINUTE * 60
 
 
-def format_timestamp_from_seconds(seconds: int):
+def format_timestamp_from_seconds(seconds: float):
     hours = seconds // SECONDS_IN_HOUR
 
     minutes_remainder = seconds % SECONDS_IN_HOUR // SECONDS_IN_MINUTE

@@ -4,7 +4,7 @@ from typing import cast
 import eyed3
 import eyed3.mp3
 
-from timecodes_generator.core.generate_timecodes import Timecode
+from timecodes_generator.core.types import Timecode
 from timecodes_generator.core.utils.audio import convert_audio_file
 from timecodes_generator.core.utils.errors import AudioProcessingError
 

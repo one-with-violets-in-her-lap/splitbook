@@ -1,33 +1,11 @@
 import logging
-from dataclasses import dataclass
 from re import Pattern
-from typing import TypedDict, cast
 
-from whisper import Whisper
+from dumb_whisper import Segment, Whisper
 
-from timecodes_generator.core.utils.datetime_formatting import (
-    format_timestamp_from_seconds,
-)
+from timecodes_generator.core.types import Timecode
 
 _logger = logging.getLogger(__name__)
-
-
-class Segment(TypedDict):
-    id: int
-    start: int
-    end: int
-    text: str
-
-
-@dataclass
-class Timecode:
-    id: int
-    start_seconds: int
-    end_seconds: int
-    title: str
-
-    def __str__(self):
-        return f"{format_timestamp_from_seconds(self.start_seconds)} - {self.title}"
 
 
 SEGMENT_GROUP_SIZE = 3
@@ -38,7 +16,7 @@ def find_segment_by_string_position(segment_group: list[Segment], position: int)
 
     for segment in segment_group:
         text_start = text_end - 1
-        text_end = text_end + len(segment["text"])
+        text_end = text_end + len(segment.text)
 
         if position > text_start and position < text_end:
             return segment
@@ -62,9 +40,9 @@ def parse_timecodes_from_segment_group(
 
         timecodes.append(
             Timecode(
-                id=segment_with_occurrence["id"],
-                start_seconds=segment_with_occurrence["start"],
-                end_seconds=segment_with_occurrence["end"],
+                id=segment_with_occurrence.id,
+                start_seconds=segment_with_occurrence.start,
+                end_seconds=segment_with_occurrence.end,
                 title=match.group(),
             )
         )
@@ -91,7 +69,7 @@ def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
             segment_start_index : segment_start_index + SEGMENT_GROUP_SIZE
         ]
 
-        text = "".join([segment["text"] for segment in segment_group])
+        text = "".join([segment.text for segment in segment_group])
 
         _logger.debug("Merged segments: %s", text)
 
@@ -109,13 +87,11 @@ def generate_timecodes(
     search_pattern: Pattern,
     verbose: bool | None = None,
 ) -> list[Timecode]:
-    transcription_result = whisper_model.transcribe(file_path, verbose=verbose)
-    segments = cast(list[Segment], transcription_result["segments"])
+    transcription = whisper_model.transcribe(file_path, verbose=verbose)
 
-    _logger.debug("Transcribed: %s", transcription_result["text"])
-    _logger.debug(
-        "Segments: %s",
-        "\n".join([str(segment) for segment in transcription_result["segments"]]),
-    )
+    segments: list[Segment] = []
+
+    for segment in transcription.segments:
+        segments.append(segment)
 
     return extract_timecodes(segments, search_pattern)

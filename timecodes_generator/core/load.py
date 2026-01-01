@@ -1,6 +1,6 @@
 from enum import Enum
 
-import whisper
+import dumb_whisper
 
 
 class ModelName(Enum):
@@ -17,4 +17,4 @@ class ModelName(Enum):
 
 
 def load_whisper_model(model_name: ModelName):
-    return whisper.load_model(model_name.value)
+    return dumb_whisper.load_model(model_name.value)

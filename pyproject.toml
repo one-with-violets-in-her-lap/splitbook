@@ -6,8 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "click>=8.3.1",
+    "dumb-whisper",
     "eyed3>=0.9.9",
-    "openai-whisper>=20250625",
 ]
 
 [dependency-groups]
@@ -15,3 +15,6 @@ dev = [
     "pyright>=1.1.407",
     "pytest>=9.0.2",
 ]
+
+[tool.uv.sources]
+dumb-whisper = { git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper", rev = "bde2f52fa5014d0cf7a38a55b5d077e6cda9595d" }
