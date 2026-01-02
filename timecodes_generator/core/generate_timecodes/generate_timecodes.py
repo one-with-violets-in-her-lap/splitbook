@@ -1,5 +1,6 @@
 import logging
 from re import Pattern
+from typing import Callable
 
 from dumb_whisper import Segment, Whisper
 
@@ -81,17 +82,46 @@ def extract_timecodes(segments: list[Segment], search_pattern: Pattern):
     return timecodes
 
 
+ProgressCallback = Callable[[float, float, Segment | None], None]
+
+
 def generate_timecodes(
     whisper_model: Whisper,
     file_path: str,
     search_pattern: Pattern,
-    verbose: bool | None = None,
+    is_verbose: bool | None = None,
+    on_progress_update: ProgressCallback | None = None,
 ) -> list[Timecode]:
-    transcription = whisper_model.transcribe(file_path, verbose=verbose)
+    """
+    Transcribes the audio, finds marker words using `search_pattern` param and creates
+    timecodes based on them
+
+    :param on_progress_update: Progress update callback that accepts three params:
+        1. Current amount of seconds transcribed
+        2. Total duration in seconds
+        3. New transcribed segment (can be `None` on the last progress update due to silence)
+
+    :param is_verbose: If `None`, Whisper module output is completely silenced,
+        if `False` - Whisper prints reduced amount of info, if `True` - prints everything
+    """
+
+    transcription = whisper_model.transcribe(file_path, verbose=is_verbose)
 
     segments: list[Segment] = []
 
     for segment in transcription.segments:
+        if on_progress_update:
+            on_progress_update(
+                segment.end, transcription.info.seconds_duration, segment
+            )
+
         segments.append(segment)
+
+    if on_progress_update:
+        on_progress_update(
+            transcription.info.seconds_duration,
+            transcription.info.seconds_duration,
+            None,
+        )
 
     return extract_timecodes(segments, search_pattern)

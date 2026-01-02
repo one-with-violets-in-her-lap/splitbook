@@ -1,14 +1,18 @@
 import logging
 import re
+from threading import Thread
 
 import click
+from dumb_whisper import Segment
 
+from timecodes_generator.cli.transcribing_progress import CliTranscribingProgress
 from timecodes_generator.core.export import EXPORTERS, ExportFormat
 from timecodes_generator.core.generate_timecodes import generate_timecodes
 from timecodes_generator.core.load import ModelName, load_whisper_model
 from timecodes_generator.core.utils.datetime_formatting import (
     format_timestamp_from_seconds,
 )
+from timecodes_generator.core.utils.logging import configure_logging
 from timecodes_generator.core.utils.regex import join_and_compile_regex_patterns
 
 log_level_names_mapping = logging.getLevelNamesMapping()
@@ -31,9 +35,8 @@ export_format_click_type = click.Choice(
     + "You can provide multiple patterns by using "
     + "this option multiple times (-s Pattern -s Pattern ...)",
 )
-@click.option(
-    "--log-level", "-l", type=click.Choice(log_level_names_mapping), default="ERROR"
-)
+@click.option("--log-level", type=click.Choice(log_level_names_mapping), default="INFO")
+@click.option("--log-file-path", "--log", "-l", default=None, required=False)
 @click.option(
     "--model",
     "-m",
@@ -56,26 +59,43 @@ def start_cli(
     file_path: str,
     search_patterns: list[str],
     log_level: str,
+    log_file_path: str | None,
     model_name: str,
     export_format: str | None,
     is_verbose: bool,
 ):
-    logging.basicConfig(
-        level=log_level_names_mapping[log_level],
-        format="%(asctime)s: [%(levelname)s] %(name)s - %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
+    configure_logging(log_file_path, log_level_names_mapping[log_level])
 
-    click.secho(f"\n- Loading a model - Whisper {model_name}\n", dim=True)
+    click.echo(
+        click.style("\n- Loading a model - ", dim=True)
+        + click.style(f"Whisper {model_name}\n", italic=True)
+    )
     model = load_whisper_model(ModelName(model_name))
 
-    click.secho("- Transcribing ...\n", dim=True)
+    progress = CliTranscribingProgress()
+    cli_progress_showing_thread = Thread(target=progress.start_animations)
+    cli_progress_showing_thread.start()
+
+    def handle_progress_update(
+        seconds_transcribed: float,
+        total_seconds_duration: float,
+        new_segment: Segment | None,
+    ):
+        progress.update_progress(
+            new_segment.text if new_segment is not None else "",
+            seconds_transcribed,
+            total_seconds_duration,
+        )
+
     timecodes = generate_timecodes(
         model,
         file_path,
         join_and_compile_regex_patterns(search_patterns, flags=re.IGNORECASE),
-        verbose=False,
+        is_verbose=None,  # Silences default Whisper output
+        on_progress_update=handle_progress_update,
     )
+
+    progress.stop_animations()
 
     click.secho("\n★ Timecodes:", bold=True)
 
@@ -88,7 +108,7 @@ def start_cli(
 
     if export_format is None:
         is_export_allowed = click.confirm(
-            click.style("\n(?) ", dim=True) + "Would you like to save the timecodes?"
+            click.style("\n(?) ", dim=True) + "Would you like to save the timecodes?",
         )
 
         if is_export_allowed:
