@@ -1,10 +1,10 @@
 import re
 
-from timecodes_generator.core.generate_timecodes.generate_timecodes import (
+from splitbook.core.generate_timecodes.generate_timecodes import (
     Segment,
     extract_timecodes,
 )
-from timecodes_generator.core.utils.regex import join_and_compile_regex_patterns
+from splitbook.core.utils.regex import join_and_compile_regex_patterns
 
 TEST_TIMECODE_SEARCH_PATTERNS = [
     r"(?:Unit \d+.?)? Activity [a-zA-Z].+?(?=\.|$)",  # Unit {number}. Activity {letter}. {...remaining sentence}

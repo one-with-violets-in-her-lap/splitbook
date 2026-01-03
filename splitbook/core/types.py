@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from timecodes_generator.core.utils.datetime_formatting.datetime_formatting import (
+from splitbook.core.utils.datetime_formatting.datetime_formatting import (
     format_timestamp_from_seconds,
 )
 
