@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import Callable
 
-from timecodes_generator.core.export.folder import export_timecodes_as_folder
-from timecodes_generator.core.export.id3_tagged_file import export_tagged_audio_file
-from timecodes_generator.core.types import Timecode
+from splitbook.core.export.folder import export_timecodes_as_folder
+from splitbook.core.export.id3_tagged_file import export_tagged_audio_file
+from splitbook.core.types import Timecode
 
 
 class ExportFormat(Enum):

@@ -5,15 +5,16 @@ from threading import Thread
 import click
 from dumb_whisper import Segment
 
-from timecodes_generator.cli.transcribing_progress import CliTranscribingProgress
-from timecodes_generator.core.export import EXPORTERS, ExportFormat
-from timecodes_generator.core.generate_timecodes import generate_timecodes
-from timecodes_generator.core.load import ModelName, load_whisper_model
-from timecodes_generator.core.utils.datetime_formatting import (
+from splitbook.cli.help_banner import CLI_HELP_BANNER
+from splitbook.cli.transcribing_progress import CliTranscribingProgress
+from splitbook.core.export import EXPORTERS, ExportFormat
+from splitbook.core.generate_timecodes import generate_timecodes
+from splitbook.core.load import ModelName, load_whisper_model
+from splitbook.core.utils.datetime_formatting import (
     format_timestamp_from_seconds,
 )
-from timecodes_generator.core.utils.logging import configure_logging
-from timecodes_generator.core.utils.regex import join_and_compile_regex_patterns
+from splitbook.core.utils.logging import configure_logging
+from splitbook.core.utils.regex import join_and_compile_regex_patterns
 
 log_level_names_mapping = logging.getLevelNamesMapping()
 
@@ -22,7 +23,7 @@ export_format_click_type = click.Choice(
 )
 
 
-@click.command()
+@click.command(help=CLI_HELP_BANNER)
 @click.argument("file-path", required=True)
 @click.option(
     "--search",
@@ -54,7 +55,10 @@ export_format_click_type = click.Choice(
     + "- id3: Encode timecodes in a new MP3 file with chapters\n"
     + "- folder: Split original file in multiple files based on the timecodes",
 )
-@click.option("--verbose", "-v", "is_verbose", default=False)
+@click.option("--verbose", "-v", "is_verbose", default=False, is_flag=True)
+@click.option(
+    "--disable-animations", "are_animations_disabled", default=False, is_flag=True
+)
 def start_cli(
     file_path: str,
     search_patterns: list[str],
@@ -63,6 +67,7 @@ def start_cli(
     model_name: str,
     export_format: str | None,
     is_verbose: bool,
+    are_animations_disabled: bool,
 ):
     configure_logging(log_file_path, log_level_names_mapping[log_level])
 
@@ -74,7 +79,11 @@ def start_cli(
 
     progress = CliTranscribingProgress()
     cli_progress_showing_thread = Thread(target=progress.start_animations)
-    cli_progress_showing_thread.start()
+
+    if are_animations_disabled:
+        click.secho("Transcribing ....\n")
+    else:
+        cli_progress_showing_thread.start()
 
     def handle_progress_update(
         seconds_transcribed: float,

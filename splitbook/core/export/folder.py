@@ -1,8 +1,8 @@
 import os
 
-from timecodes_generator.core.types import Timecode
-from timecodes_generator.core.utils.audio import save_audio_file_part
-from timecodes_generator.core.utils.sanitize_filename import sanitize_filename
+from splitbook.core.types import Timecode
+from splitbook.core.utils.audio import save_audio_file_part
+from splitbook.core.utils.sanitize_filename import sanitize_filename
 
 
 def export_timecodes_as_folder(

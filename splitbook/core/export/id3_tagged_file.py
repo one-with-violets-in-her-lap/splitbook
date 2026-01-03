@@ -4,9 +4,9 @@ from typing import cast
 import eyed3
 import eyed3.mp3
 
-from timecodes_generator.core.types import Timecode
-from timecodes_generator.core.utils.audio import convert_audio_file
-from timecodes_generator.core.utils.errors import AudioProcessingError
+from splitbook.core.types import Timecode
+from splitbook.core.utils.audio import convert_audio_file
+from splitbook.core.utils.errors import AudioProcessingError
 
 
 def prepare_mp3_file_for_tagging(source_audio_file_path: str, is_verbose=True):

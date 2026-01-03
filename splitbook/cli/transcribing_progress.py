@@ -4,8 +4,8 @@ import time
 
 import click
 
-from timecodes_generator.cli.utils.formatting.formatting import format_text_in_columns
-from timecodes_generator.cli.waveform_animation import CliWaveformAnimation
+from splitbook.cli.utils.formatting.formatting import format_text_in_columns
+from splitbook.cli.waveform_animation import CliWaveformAnimation
 
 CLEAR_LINE_CODE = "\033[A                             \033[A"
 

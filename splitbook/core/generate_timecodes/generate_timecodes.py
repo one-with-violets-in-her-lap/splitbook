@@ -4,7 +4,7 @@ from typing import Callable
 
 from dumb_whisper import Segment, Whisper
 
-from timecodes_generator.core.types import Timecode
+from splitbook.core.types import Timecode
 
 _logger = logging.getLogger(__name__)
 

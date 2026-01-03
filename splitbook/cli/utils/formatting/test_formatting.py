@@ -1,5 +1,5 @@
 import click
-from timecodes_generator.cli.utils.formatting.formatting import format_text_in_columns
+from splitbook.cli.utils.formatting.formatting import format_text_in_columns
 
 
 def test_format_text_in_columns():
