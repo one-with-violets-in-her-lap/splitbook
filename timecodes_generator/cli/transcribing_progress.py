@@ -4,16 +4,26 @@ import time
 
 import click
 
+from timecodes_generator.cli.utils.formatting.formatting import format_text_in_columns
+from timecodes_generator.cli.waveform_animation import CliWaveformAnimation
+
 CLEAR_LINE_CODE = "\033[A                             \033[A"
 
 STATUS_TEXT = "Transcribing ...."
+STATUS_TEXT_COLUMN_WIDTH = 64
+
+WAVEFORM_COLUMN_WIDTH = 20
+
 TYPING_ANIMATION_DURATION_SECONDS = 2.4
 
 TRANSCRIPTION_PREVIEW_UPDATE_RATE_SECONDS = 0.3
+TRANSCRIPTION_PREVIEW_COLUMN_WIDTH = 64
 TRANSCRIPTION_CAROUSEL_SPEED = 2
 TRANSCRIPTION_CAROUSEL_WIDTH = 50
 
 _logger = logging.getLogger(__name__)
+
+terminal_width = shutil.get_terminal_size()[0]
 
 
 class CliTranscribingProgress:
@@ -22,12 +32,12 @@ class CliTranscribingProgress:
         self.seconds_transcribed: float | None = None
         self.total_seconds_duration: float | None = None
 
+        self.waveform_animation = CliWaveformAnimation()
+
         self._is_typing_animation_stopped = False
         self._transcription_preview_animation = {
             "is_stopped": True,
-            "carousel_width": min(
-                TRANSCRIPTION_CAROUSEL_WIDTH, shutil.get_terminal_size()[0]
-            ),
+            "carousel_width": min(TRANSCRIPTION_CAROUSEL_WIDTH, terminal_width),
             "carousel_offset": 0,
         }
 
@@ -42,20 +52,32 @@ class CliTranscribingProgress:
 
         return status_text
 
-    def _play_typing_animation(self):
-        click.echo()
+    def _clear_lines(self):
+        for _ in range(self.waveform_animation.line_count):
+            click.echo(CLEAR_LINE_CODE)
 
+    def _play_typing_animation(self):
         current_text = ""
         typing_rate = TYPING_ANIMATION_DURATION_SECONDS / len(STATUS_TEXT)
 
-        for character in STATUS_TEXT:
+        for character_index, character in enumerate(STATUS_TEXT):
+            if character_index > 0:
+                self._clear_lines()
+
             if self._is_typing_animation_stopped:
                 current_text = STATUS_TEXT
             else:
                 current_text += character
 
-            click.echo(CLEAR_LINE_CODE)
-            click.secho(current_text)
+            click.echo(
+                format_text_in_columns(
+                    {"width": STATUS_TEXT_COLUMN_WIDTH, "text": "\n\n" + current_text},
+                    {
+                        "width": WAVEFORM_COLUMN_WIDTH,
+                        "text": self.waveform_animation.get_current_frame_and_update(),
+                    },
+                )
+            )
 
             if self._is_typing_animation_stopped:
                 break
@@ -66,15 +88,6 @@ class CliTranscribingProgress:
 
         click.echo()
 
-    def _play_transcription_preview_animation(self):
-        self._transcription_preview_animation["is_stopped"] = False
-
-        while not self._transcription_preview_animation["is_stopped"]:
-            self._update_transcription_preview_animation()
-            time.sleep(TRANSCRIPTION_PREVIEW_UPDATE_RATE_SECONDS)
-
-        self._transcription_preview_animation["is_stopped"] = True
-
     def _update_transcription_preview_animation(self):
         if (
             self.transcription_text is None
@@ -82,30 +95,46 @@ class CliTranscribingProgress:
         ):
             return
 
-        # Reprints both the status text ("Transcribing ....") and transcription preview
-        click.echo(CLEAR_LINE_CODE)
-        click.echo(CLEAR_LINE_CODE)
+        self._clear_lines()
 
-        click.echo(self._build_status_text())
+        text_end = (
+            self._transcription_preview_animation["carousel_offset"]
+            + self._transcription_preview_animation["carousel_width"]
+        )
 
-        click.secho(
+        transcription_preview = click.style(
             "   "
             + self.transcription_text[
-                self._transcription_preview_animation[
-                    "carousel_offset"
-                ] : self._transcription_preview_animation["carousel_offset"]
-                + self._transcription_preview_animation["carousel_width"]
+                self._transcription_preview_animation["carousel_offset"] : text_end
             ],
             dim=True,
         )
 
-        if len(self.transcription_text) > (
-            self._transcription_preview_animation["carousel_offset"]
-            + self._transcription_preview_animation["carousel_width"]
-        ):
+        click.echo(
+            format_text_in_columns(
+                {
+                    "width": TRANSCRIPTION_PREVIEW_COLUMN_WIDTH,
+                    "text": "\n" + self._build_status_text() + "\n" + transcription_preview,
+                },
+                {
+                    "width": WAVEFORM_COLUMN_WIDTH,
+                    "text": self.waveform_animation.get_current_frame_and_update(),
+                },
+            )
+        )
+
+        # If more text is available, moves the carousel
+        if len(self.transcription_text) > text_end:
             self._transcription_preview_animation["carousel_offset"] += (
                 TRANSCRIPTION_CAROUSEL_SPEED
             )
+
+    def _play_transcription_preview_animation(self):
+        self._transcription_preview_animation["is_stopped"] = False
+
+        while not self._transcription_preview_animation["is_stopped"]:
+            self._update_transcription_preview_animation()
+            time.sleep(TRANSCRIPTION_PREVIEW_UPDATE_RATE_SECONDS)
 
     def start_animations(self):
         self._play_typing_animation()
