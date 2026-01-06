@@ -1,4 +1,3 @@
-import click
 from splitbook.cli.utils.formatting.formatting import format_text_in_columns
 
 

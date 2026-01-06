@@ -112,7 +112,10 @@ class CliTranscribingProgress:
             format_text_in_columns(
                 {
                     "width": TRANSCRIPTION_PREVIEW_COLUMN_WIDTH,
-                    "text": "\n\n" + self._build_status_text() + "\n" + transcription_preview,
+                    "text": "\n\n"
+                    + self._build_status_text()
+                    + "\n"
+                    + transcription_preview,
                 },
                 {
                     "width": WAVEFORM_COLUMN_WIDTH,

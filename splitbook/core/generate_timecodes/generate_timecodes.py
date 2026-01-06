@@ -89,6 +89,7 @@ def generate_timecodes(
     whisper_model: Whisper,
     file_path: str,
     search_pattern: Pattern,
+    language: str,
     is_verbose: bool | None = None,
     on_progress_update: ProgressCallback | None = None,
 ) -> list[Timecode]:
@@ -105,7 +106,9 @@ def generate_timecodes(
         if `False` - Whisper prints reduced amount of info, if `True` - prints everything
     """
 
-    transcription = whisper_model.transcribe(file_path, verbose=is_verbose)
+    transcription = whisper_model.transcribe(
+        file_path, verbose=is_verbose, language=language
+    )
 
     segments: list[Segment] = []
 

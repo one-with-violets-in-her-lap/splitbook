@@ -4,6 +4,7 @@ from threading import Thread
 
 import click
 from dumb_whisper import Segment
+from dumb_whisper.tokenizer import LANGUAGES
 
 from splitbook.cli.help_banner import CLI_HELP_BANNER
 from splitbook.cli.transcribing_progress import CliTranscribingProgress
@@ -36,6 +37,15 @@ export_format_click_type = click.Choice(
     + "You can provide multiple patterns by using "
     + "this option multiple times (-s Pattern -s Pattern ...)",
 )
+@click.option(
+    "--language",
+    "--lang",
+    "language",
+    help='The code of the language of an audiobook (e.g. "en"). Find available languages '
+    + "here - https://whisper-api.com/docs/languages/. English is the default language",
+    type=click.Choice(LANGUAGES),
+    required=False,
+)
 @click.option("--log-level", type=click.Choice(log_level_names_mapping), default="INFO")
 @click.option("--log-file-path", "--log", "-l", default=None, required=False)
 @click.option(
@@ -61,6 +71,7 @@ export_format_click_type = click.Choice(
 )
 def start_cli(
     file_path: str,
+    language: str | None,  # TODO: Add proper typing
     search_patterns: list[str],
     log_level: str,
     log_file_path: str | None,
@@ -71,9 +82,16 @@ def start_cli(
 ):
     configure_logging(log_file_path, log_level_names_mapping[log_level])
 
+    language_title = (
+        LANGUAGES[language].capitalize() if language is not None else "Auto detect"
+    )
+
     click.echo(
-        click.style("\n- Loading a model - ", dim=True)
-        + click.style(f"Whisper {model_name}\n", italic=True)
+        click.style("\nModel: ", dim=True)
+        + click.style(f"Whisper {model_name}", italic=True)
+        + click.style("    Language: ", dim=True)
+        + click.style(language_title)
+        + "\n"
     )
     model = load_whisper_model(ModelName(model_name))
 
@@ -99,9 +117,12 @@ def start_cli(
         )
 
     timecodes = generate_timecodes(
-        model,
-        file_path,
-        join_and_compile_regex_patterns(search_patterns, flags=re.IGNORECASE),
+        whisper_model=model,
+        file_path=file_path,
+        language=language,
+        search_pattern=join_and_compile_regex_patterns(
+            search_patterns, flags=re.IGNORECASE
+        ),
         is_verbose=None,  # Silences default Whisper output
         on_progress_update=handle_progress_update,
     )

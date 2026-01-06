@@ -18,7 +18,9 @@ def prepare_mp3_file_for_tagging(source_audio_file_path: str, is_verbose=True):
     return mp3_file_path
 
 
-def export_tagged_audio_file(source_file_path: str, timecodes: list[Timecode], is_verbose=True):
+def export_tagged_audio_file(
+    source_file_path: str, timecodes: list[Timecode], is_verbose=True
+):
     mp3_file_path = prepare_mp3_file_for_tagging(source_file_path, is_verbose)
 
     audio = cast(eyed3.mp3.Mp3AudioFile, eyed3.load(mp3_file_path))
