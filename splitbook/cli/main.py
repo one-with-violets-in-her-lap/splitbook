@@ -94,6 +94,8 @@ def start_cli(
             new_segment.text if new_segment is not None else "",
             seconds_transcribed,
             total_seconds_duration,
+            # Additionally reprints progress info only on completion, in other cases interval updates are sufficient
+            rerender=new_segment is None,
         )
 
     timecodes = generate_timecodes(

@@ -14,7 +14,7 @@ STATUS_TEXT_COLUMN_WIDTH = 64
 
 WAVEFORM_COLUMN_WIDTH = 20
 
-TYPING_ANIMATION_DURATION_SECONDS = 2.4
+TYPING_ANIMATION_DURATION_SECONDS = 2.8
 
 TRANSCRIPTION_PREVIEW_UPDATE_RATE_SECONDS = 0.3
 TRANSCRIPTION_PREVIEW_COLUMN_WIDTH = 64
@@ -86,8 +86,6 @@ class CliTranscribingProgress:
 
         self._is_typing_animation_stopped = True
 
-        click.echo()
-
     def _update_transcription_preview_animation(self):
         if (
             self.transcription_text is None
@@ -114,7 +112,7 @@ class CliTranscribingProgress:
             format_text_in_columns(
                 {
                     "width": TRANSCRIPTION_PREVIEW_COLUMN_WIDTH,
-                    "text": "\n" + self._build_status_text() + "\n" + transcription_preview,
+                    "text": "\n\n" + self._build_status_text() + "\n" + transcription_preview,
                 },
                 {
                     "width": WAVEFORM_COLUMN_WIDTH,
@@ -145,6 +143,7 @@ class CliTranscribingProgress:
         append_transcription: str,
         seconds_transcribed: float,
         total_seconds_duration: float,
+        rerender=True,
     ):
         if self.transcription_text is None:
             self.transcription_text = append_transcription
@@ -154,7 +153,8 @@ class CliTranscribingProgress:
         self.seconds_transcribed = seconds_transcribed
         self.total_seconds_duration = total_seconds_duration
 
-        self._update_transcription_preview_animation()
+        if rerender:
+            self._update_transcription_preview_animation()
 
     def stop_animations(self):
         self._is_typing_animation_stopped = True
