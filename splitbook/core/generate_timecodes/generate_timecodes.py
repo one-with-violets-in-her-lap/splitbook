@@ -89,7 +89,7 @@ def generate_timecodes(
     whisper_model: Whisper,
     file_path: str,
     search_pattern: Pattern,
-    language: str,
+    language: str | None,
     is_verbose: bool | None = None,
     on_progress_update: ProgressCallback | None = None,
 ) -> list[Timecode]:
