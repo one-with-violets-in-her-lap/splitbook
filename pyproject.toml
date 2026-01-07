@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "click>=8.3.1",
-    "dumb-whisper",
+    "dumb-whisper @ git+https://github.com/one-with-violets-in-her-lap/dumb-whisper@8df1c94b7f6e8c55fb7685cdf39aae052f3c482a",
     "eyed3>=0.9.9",
 ]
 
