@@ -88,7 +88,7 @@ wheels = [
 [[package]]
 name = "dumb-whisper"
 version = "20250625"
-source = { git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper?rev=bcf8d012586b7143b7d558c783b41c1c1abbc6a8#bcf8d012586b7143b7d558c783b41c1c1abbc6a8" }
+source = { git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper?rev=8df1c94b7f6e8c55fb7685cdf39aae052f3c482a#8df1c94b7f6e8c55fb7685cdf39aae052f3c482a" }
 dependencies = [
     { name = "more-itertools" },
     { name = "numba" },
@@ -642,7 +642,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "click", specifier = ">=8.3.1" },
-    { name = "dumb-whisper", git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper?rev=bcf8d012586b7143b7d558c783b41c1c1abbc6a8" },
+    { name = "dumb-whisper", git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper?rev=8df1c94b7f6e8c55fb7685cdf39aae052f3c482a" },
     { name = "eyed3", specifier = ">=0.9.9" },
 ]
 

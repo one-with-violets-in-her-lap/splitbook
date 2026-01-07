@@ -17,4 +17,4 @@ dev = [
 ]
 
 [tool.uv.sources]
-dumb-whisper = { git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper", rev = "bcf8d012586b7143b7d558c783b41c1c1abbc6a8" }
+dumb-whisper = { git = "https://github.com/one-with-violets-in-her-lap/dumb-whisper", rev = "8df1c94b7f6e8c55fb7685cdf39aae052f3c482a" }
