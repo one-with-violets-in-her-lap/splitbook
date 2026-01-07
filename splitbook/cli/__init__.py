@@ -156,7 +156,3 @@ def start_cli(
         export_result_path = exporter(file_path, timecodes, is_verbose)
 
         click.secho(f"\n✓ Saved at {export_result_path}", fg="green")
-
-
-if __name__ == "__main__":
-    start_cli()
