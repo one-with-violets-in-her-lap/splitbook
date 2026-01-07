@@ -118,6 +118,8 @@ def generate_timecodes(
                 segment.end, transcription.info.seconds_duration, segment
             )
 
+        _logger.debug(segment)
+
         segments.append(segment)
 
     if on_progress_update:
