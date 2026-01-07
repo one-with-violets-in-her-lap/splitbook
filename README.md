@@ -7,6 +7,8 @@ for marker words, like "Unit 1", using regex patterns (I know it sucks and shoul
 
 You can split the book into multiple audio files or save the timecodes in a single MP3 file via ID3 tags
 
+![](./showcase.gif)
+
 ## Usage
 
 Install with pip:
